@@ -1,0 +1,32 @@
+<meta charset="utf8">
+<html>
+  <script src='sql/sql-wasm.js'></script>
+  <script>
+  	navigator.geolocation.getCurrentPosition(function(position) {
+	  	sdsdsd(position.coords.latitude, position.coords.longitude);
+	});
+  	function sdsdsd(a, b){
+  		console.log(a, b);
+  	}
+
+    config = { locateFile: filename => `sql/${filename}` }
+    initSqlJs(config).then(function(SQL){
+    	
+    	const xhr = new XMLHttpRequest();
+		xhr.open('GET', 'main.db', true);
+		xhr.responseType = 'arraybuffer';
+
+		xhr.onload = e => {
+		  	const uInt8Array = new Uint8Array(xhr.response);
+		  	const db = new SQL.Database(uInt8Array);
+		  	for (let i = 0; i < 50; i++) {
+			  	console.log(db.prepare(`SELECT ID, NAME, LON, LAT FROM DATA ORDER BY ABS( LAT - 48.3452 ), ABS( LON - 15.6201 ) LIMIT 1 OFFSET ${i}`).getAsObject({$start:1, $end:1}));
+			} 
+		};
+	xhr.send();
+    });
+  </script>
+  <body>
+    Output is in Javascript console
+  </body>
+</html>
