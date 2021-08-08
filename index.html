@@ -3,30 +3,34 @@
   <script src='sql/sql-wasm.js'></script>
   <script>
   	navigator.geolocation.getCurrentPosition(function(position) {
-	  	sdsdsd(position.coords.latitude, position.coords.longitude);
-	});
-  	function sdsdsd(a, b){
-  		console.log(a, b);
-  	}
+	  	onres(position.coords.latitude, position.coords.longitude);
+		});
 
-    config = { locateFile: filename => `sql/${filename}` }
-    initSqlJs(config).then(function(SQL){
-    	
-    	const xhr = new XMLHttpRequest();
-		xhr.open('GET', 'main.db', true);
-		xhr.responseType = 'arraybuffer';
+  	function onres(a, b){
+  		console.log("Current Possition", b, a);
 
-		xhr.onload = e => {
-		  	const uInt8Array = new Uint8Array(xhr.response);
-		  	const db = new SQL.Database(uInt8Array);
-		  	for (let i = 0; i < 50; i++) {
-			  	console.log(db.prepare(`SELECT ID, NAME, LON, LAT FROM DATA ORDER BY ABS( LAT - 48.3452 ), ABS( LON - 15.6201 ) LIMIT 1 OFFSET ${i}`).getAsObject({$start:1, $end:1}));
-			} 
-		};
-	xhr.send();
-    });
+  		config = { locateFile: filename => `sql/${filename}` }
+  		initSqlJs(config).then(function(SQL){
+		    const xhr = new XMLHttpRequest();
+				xhr.open('GET', 'main.db', true);
+				xhr.responseType = 'arraybuffer';
+
+				xhr.onload = e => {
+			  	const uInt8Array = new Uint8Array(xhr.response);
+			  	const db = new SQL.Database(uInt8Array);
+			  	for (let i = 0; i < 50; i++) {
+				  	document.getElementById("list").innerHTML += "<li>"+(db.prepare(`SELECT NAME FROM DATA WHERE LON BETWEEN ${b-0.05} AND ${b+0.05} AND LAT BETWEEN ${a-0.05} AND ${a+0.05} ORDER BY ABS( LAT - ${a} ), ABS( LON - ${b} )  LIMIT 1 OFFSET ${i}`).getAsObject({$start:1, $end:1})["NAME"])+"</li>";
+					} 
+				};
+				xhr.send();
+	    });
+	  	}
   </script>
+  <head>
+  	<title>Staloc Gelocation</title>
+  	<link type="image/x-icon" href="/favicon.ico">
+  </head>
   <body>
-    Output is in Javascript console
+    <ul id="list"></ul>
   </body>
 </html>
